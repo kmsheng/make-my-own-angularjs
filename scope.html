@@ -1,0 +1,74 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+    <script>
+
+        // 每個 scope 物件底下都有一個 $$watchers 陣列
+        function Scope() {
+            this.$$watchers = [];
+        }
+
+        // $watch() 新增一個 watcher 物件到 $$watchers 陣列
+        Scope.prototype.$watch = function(watchFn, listenerFn) {
+
+            var watcher = {
+                watchFn: watchFn,
+                listenerFn: listenerFn
+            };
+
+            this.$$watchers.push(watcher);
+        };
+
+        // 比對新舊 value 並記錄 newValue
+        Scope.prototype.$digest = function() {
+
+            var length = this.$$watchers.length;
+
+            for (var i = 0; i < length; i++) {
+
+                var watch = this.$$watchers[i];
+                var newValue = watch.watchFn(this);
+                var oldValue = watch.last;
+
+                if (newValue !== oldValue) {
+                    watch.listenerFn(newValue, oldValue, this);
+                }
+                watch.last = newValue;
+            }
+        };
+
+        var scope = new Scope();
+        scope.firstName = 'Joe';
+        scope.counter = 0;
+
+        // 註冊 watchFn 與 listenerFn
+        scope.$watch(function(scope) {
+            return scope.firstName;
+        },function (newValue, oldValue, scope) {
+            scope.counter++;
+        });
+
+        // 還沒執行 $digest() 所以 counter 現在應該是 0
+        console.log(scope.counter === 0);
+
+        // 第一次 $digist() 執行過了, 所以 listenerFn 要 + 1
+        scope.$digest();
+        console.log(scope.counter === 1);
+
+        // 因為有記錄 oldValue 了, newValue 也沒變, 所以 listenerFn() 不會被執行
+        scope.$digest();
+        scope.$digest();
+        console.log(scope.counter === 1);
+
+        // scope.firstName 被 assign 新的值了, 所以 listenerFn 會被執行
+        scope.firstName = 'Jane';
+        scope.$digest();
+        console.log(scope.counter === 2);
+
+    </script>
+</body>
+</html>
