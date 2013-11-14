@@ -1,0 +1,20 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+  <script>
+
+    var FN_ARGS = /^function\s*[^\(]*\(\s*([^\)]*)\)/m;
+
+    var controller = function($scope, $why, $how) {
+    };
+
+    var args = controller.toString().match(FN_ARGS)[1].split(',');
+
+    console.log(args);
+  </script>
+</body>
+</html>
